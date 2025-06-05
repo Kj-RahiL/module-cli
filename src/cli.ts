@@ -66,6 +66,10 @@ const getSingle${moduleName} = async (id: string) => {
 };
 
 const update${moduleName} = async (id: string, data: any) => {
+    const existing${moduleName} = await prisma.${moduleName.toLowerCase()}.findUnique({ where: { id } });
+    if (!existing${moduleName}) {
+        throw new ApiError(httpStatus.NOT_FOUND, "${moduleName} not found..!!");
+    }
     const result = await prisma.${moduleName.toLowerCase()}.update({ where: { id }, data });
     return result;
 };
@@ -133,7 +137,7 @@ const update${moduleName} = catchAsync(async (req: Request, res: Response) => {
 const delete${moduleName} = catchAsync(async (req: Request, res: Response) => {
     const result = await ${moduleName.toLowerCase()}Service.delete${moduleName}(req.params.id);
     sendResponse(res, {
-        statusCode: httpStatus.OK,
+        statusCode: httpStatus.NO_CONTENT,
         success: true,
         message: "${moduleName} deleted successfully",
         data: result,

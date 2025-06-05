@@ -25,12 +25,11 @@ A modular Command Line Interface (CLI) built with Node.js, designed for local us
 
 2. run and install for
 
-  ```bash
+   ```bash
    cd   module-cli
    npm i 
    npm i -g module-cli
 
-   ```
 
 2. Auto generate model , folder and file
 
