@@ -22,11 +22,13 @@ const files = {
     [`${moduleName}.validation.ts`]: `import { z } from "zod";
 
 export const ${moduleName}Schema = z.object({
-    name: z.string(),
-    email: z.string().email(),
+    body: z.object({
+        name: z.string(),
+        email: z.string().email(),
+    }),
 });
 `,
-    [`${moduleName}.interface.ts`]: `export interface I${moduleName} {
+    [`${moduleName}.interface.ts`]: `export type T${moduleName} = {
     id: string;
     name: string;
     email: string;
@@ -74,7 +76,7 @@ const update${moduleName} = async (id: string, data: any) => {
 
 const delete${moduleName} = async (id: string) => {
     const result = await prisma.${moduleName.toLowerCase()}.delete({ where: { id } });
-    return result;
+    return null;
 };
 
 export const ${moduleName.toLowerCase()}Service = {
@@ -135,10 +137,10 @@ const update${moduleName} = catchAsync(async (req: Request, res: Response) => {
 const delete${moduleName} = catchAsync(async (req: Request, res: Response) => {
     const result = await ${moduleName.toLowerCase()}Service.delete${moduleName}(req.params.id);
     sendResponse(res, {
-        statusCode: httpStatus.NO_CONTENT,
+        statusCode: httpStatus.OK,
         success: true,
         message: "${moduleName} deleted successfully",
-        data: result,
+        data: null,
     });
 });
 

@@ -24,11 +24,13 @@ const files = {
   [`${moduleName}.validation.ts`]: `import { z } from "zod";
 
 export const ${moduleName}Schema = z.object({
-    name: z.string(),
-    email: z.string().email(),
+    body: z.object({
+        name: z.string(),
+        email: z.string().email(),
+    }),
 });
 `,
-  [`${moduleName}.interface.ts`]: `export interface I${moduleName} {
+  [`${moduleName}.interface.ts`]: `export type T${moduleName} = {
     id: string;
     name: string;
     email: string;
@@ -39,6 +41,8 @@ import ApiError from "../../../errors/ApiErrors";
 import httpStatus from "http-status";
 
 const create${moduleName} = async (data: any) => {
+
+//if you wanna add logic here
     const result = await prisma.${moduleName.toLowerCase()}.create({ data });
     return result;
 };
@@ -75,8 +79,12 @@ const update${moduleName} = async (id: string, data: any) => {
 };
 
 const delete${moduleName} = async (id: string) => {
+ const existing${moduleName} = await prisma.${moduleName.toLowerCase()}.findUnique({ where: { id } });
+    if (!existing${moduleName}) {
+        throw new ApiError(httpStatus.NOT_FOUND, "${moduleName} not found..!!");
+    }
     const result = await prisma.${moduleName.toLowerCase()}.delete({ where: { id } });
-    return result;
+    return null;
 };
 
 export const ${moduleName.toLowerCase()}Service = {
@@ -137,7 +145,7 @@ const update${moduleName} = catchAsync(async (req: Request, res: Response) => {
 const delete${moduleName} = catchAsync(async (req: Request, res: Response) => {
     const result = await ${moduleName.toLowerCase()}Service.delete${moduleName}(req.params.id);
     sendResponse(res, {
-        statusCode: httpStatus.NO_CONTENT,
+        statusCode: httpStatus.OK,
         success: true,
         message: "${moduleName} deleted successfully",
         data: result,
