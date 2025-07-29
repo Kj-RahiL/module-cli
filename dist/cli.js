@@ -21,12 +21,21 @@ fs_1.default.mkdirSync(moduleDir, { recursive: true });
 const files = {
     [`${moduleName}.validation.ts`]: `import { z } from "zod";
 
-export const ${moduleName}Schema = z.object({
+ const ${moduleName}Schema = z.object({
     body: z.object({
         name: z.string(),
-        email: z.string().email(),
     }),
 });
+
+const Update${moduleName}Schema = z.object({
+    body: z.object({
+        name: z.string(),
+    }),
+});
+export const ${moduleName}Validation = {
+     ${moduleName}Schema,
+     Update${moduleName}Schema
+};
 `,
     [`${moduleName}.interface.ts`]: `export type T${moduleName} = {
     id: string;
@@ -39,12 +48,14 @@ import ApiError from "../../../errors/ApiErrors";
 import httpStatus from "http-status";
 
 const create${moduleName} = async (data: any) => {
-    const result = await prisma.${moduleName.toLowerCase()}.create({ data });
+
+//if you wanna add logic here
+    const result = await prisma.${moduleName.charAt(0).toLowerCase() + moduleName.slice(1)}.create({ data });
     return result;
 };
 
 const getAll${moduleName}s = async (query: Record<string, any>) => {
-    const queryBuilder = new QueryBuilder(prisma.${moduleName.toLowerCase()}, query);
+    const queryBuilder = new QueryBuilder(prisma.${moduleName.charAt(0).toLowerCase() + moduleName.slice(1)}, query);
     const ${moduleName.toLowerCase()}s = await queryBuilder
         .search([""])
         .filter()
@@ -58,7 +69,7 @@ const getAll${moduleName}s = async (query: Record<string, any>) => {
 };
 
 const getSingle${moduleName} = async (id: string) => {
-    const result = await prisma.${moduleName.toLowerCase()}.findUnique({ where: { id } });
+    const result = await prisma.${moduleName.charAt(0).toLowerCase() + moduleName.slice(1)}.findUnique({ where: { id } });
     if(!result){
      throw new ApiError(httpStatus.NOT_FOUND, "${moduleName} not found..!!")
     }
@@ -66,16 +77,20 @@ const getSingle${moduleName} = async (id: string) => {
 };
 
 const update${moduleName} = async (id: string, data: any) => {
-    const existing${moduleName} = await prisma.${moduleName.toLowerCase()}.findUnique({ where: { id } });
+    const existing${moduleName} = await prisma.${moduleName.charAt(0).toLowerCase() + moduleName.slice(1)}.findUnique({ where: { id } });
     if (!existing${moduleName}) {
         throw new ApiError(httpStatus.NOT_FOUND, "${moduleName} not found..!!");
     }
-    const result = await prisma.${moduleName.toLowerCase()}.update({ where: { id }, data });
+    const result = await prisma.${moduleName.charAt(0).toLowerCase() + moduleName.slice(1)}.update({ where: { id }, data });
     return result;
 };
 
 const delete${moduleName} = async (id: string) => {
-    const result = await prisma.${moduleName.toLowerCase()}.delete({ where: { id } });
+ const existing${moduleName} = await prisma.${moduleName.charAt(0).toLowerCase() + moduleName.slice(1)}.findUnique({ where: { id } });
+    if (!existing${moduleName}) {
+        throw new ApiError(httpStatus.NOT_FOUND, "${moduleName} not found..!!");
+    }
+    const result = await prisma.${moduleName.charAt(0).toLowerCase() + moduleName.slice(1)}.delete({ where: { id } });
     return null;
 };
 
@@ -140,7 +155,7 @@ const delete${moduleName} = catchAsync(async (req: Request, res: Response) => {
         statusCode: httpStatus.OK,
         success: true,
         message: "${moduleName} deleted successfully",
-        data: null,
+        data: result,
     });
 });
 
